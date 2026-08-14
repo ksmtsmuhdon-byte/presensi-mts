@@ -69,7 +69,9 @@
   <div class="subtitle">
     Arahkan kartu QR ke kamera
   </div>
-
+<button onclick="aktifkanSuara()" id="btnSuara">
+  🔊 Aktifkan Suara
+</button>
   <div id="reader"></div>
 
   <div id="hasil">
@@ -103,7 +105,13 @@ function bicara(teks) {
     window.speechSynthesis.speak(suara);
   }
 }
+function aktifkanSuara() {
+  bicara("Suara presensi aktif");
 
+  const tombol = document.getElementById("btnSuara");
+  tombol.innerHTML = "🔊 Suara Aktif";
+  tombol.disabled = true;
+}
   // =====================================================
   // SAAT QR BERHASIL DIBACA
   // =====================================================
