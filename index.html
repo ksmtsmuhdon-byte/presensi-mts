@@ -89,7 +89,20 @@
 
 
   let sedangMemproses = false;
+  
+function bicara(teks) {
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
 
+    const suara = new SpeechSynthesisUtterance(teks);
+    suara.lang = "id-ID";
+    suara.rate = 0.9;
+    suara.pitch = 1;
+    suara.volume = 1;
+
+    window.speechSynthesis.speak(suara);
+  }
+}
 
   // =====================================================
   // SAAT QR BERHASIL DIBACA
@@ -127,7 +140,8 @@
             "✅ <b>" + data.nama + "</b><br>" +
             "Status: <b>" + data.status + "</b><br>" +
             "Jam: <b>" + data.jam + "</b>";
-
+          
+        bicara("Presensi berhasil. " + data.nama);
         } else {
 
           hasil.className = "gagal";
@@ -137,11 +151,13 @@
             hasil.innerHTML =
               "⚠️ <b>" + data.nama + "</b><br>" +
               "Sudah melakukan presensi masuk hari ini.";
-
+            
+          bicara(data.nama + " sudah melakukan presensi masuk hari ini.");
           } else {
 
             hasil.innerHTML =
               "❌ " + data.message;
+            bicara(data.message);
 
           }
         }
