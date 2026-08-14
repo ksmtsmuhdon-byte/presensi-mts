@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Presensi MTs Muhammadiyah Donorejo</title>
+
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 30px 15px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    #reader {
+      width: 100%;
+      max-width: 500px;
+      margin: auto;
+    }
+
+    #hasil {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 10px;
+      background: #f3f4f6;
+      font-size: 18px;
+      min-height: 25px;
+    }
+
+    .berhasil {
+      background: #dcfce7 !important;
+    }
+
+    .gagal {
+      background: #fee2e2 !important;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>📋 PRESENSI GURU</h1>
+
+  <div class="subtitle">
+    Arahkan kartu QR ke kamera
+  </div>
+
+  <div id="reader"></div>
+
+  <div id="hasil">
+    Menunggu QR...
+  </div>
+
+</div>
+
+
+<script>
+
+  // =====================================================
+  // MASUKKAN URL WEB APP APPS SCRIPT DI SINI
+  // =====================================================
+
+  const API_URL = "https://script.google.com/macros/s/AKfycbzK3f5uPtj-WoOVFxfAxX-AUcjmDUrNKbOKG6X2V0azFtnkwhTg7AwVL9Fif0llW55Qdg/exec";
+
+
+  let sedangMemproses = false;
+
+
+  // =====================================================
+  // SAAT QR BERHASIL DIBACA
+  // =====================================================
+
+  function onScanSuccess(decodedText) {
+
+    if (sedangMemproses) {
+      return;
+    }
+
+    sedangMemproses = true;
+
+    const id = decodedText.trim();
+
+    const hasil = document.getElementById("hasil");
+
+    hasil.className = "";
+    hasil.innerHTML = "⏳ Memproses QR: <b>" + id + "</b>";
+
+
+    // Kirim ID QR ke Apps Script
+    const url = API_URL + "?id=" + encodeURIComponent(id);
+
+
+    fetch(url)
+      .then(response => response.json())
+      .then(data => {
+
+        if (data.success) {
+
+          hasil.className = "berhasil";
+
+          hasil.innerHTML =
+            "✅ <b>" + data.nama + "</b><br>" +
+            "Status: <b>" + data.status + "</b><br>" +
+            "Jam: <b>" + data.jam + "</b>";
+
+        } else {
+
+          hasil.className = "gagal";
+
+          if (data.duplicate) {
+
+            hasil.innerHTML =
+              "⚠️ <b>" + data.nama + "</b><br>" +
+              "Sudah melakukan presensi masuk hari ini.";
+
+          } else {
+
+            hasil.innerHTML =
+              "❌ " + data.message;
+
+          }
+        }
+
+      })
+
+      .catch(error => {
+
+        console.error(error);
+
+        hasil.className = "gagal";
+
+        hasil.innerHTML =
+          "❌ Gagal menghubungi server.";
+
+      });
+
+
+    // Beri jeda supaya QR yang sama tidak terbaca berkali-kali
+    setTimeout(function() {
+
+      sedangMemproses = false;
+
+      hasil.className = "";
+
+      hasil.innerHTML = "📷 Menunggu QR berikutnya...";
+
+    }, 4000);
+
+  }
+
+
+  function onScanFailure(error) {
+    // Tidak perlu melakukan apa-apa
+  }
+
+
+  // =====================================================
+  // JALANKAN SCANNER
+  // =====================================================
+
+  const scanner = new Html5QrcodeScanner(
+    "reader",
+    {
+      fps: 10,
+      qrbox: {
+        width: 250,
+        height: 250
+      }
+    },
+    false
+  );
+
+
+  scanner.render(
+    onScanSuccess,
+    onScanFailure
+  );
+
+</script>
+
+</body>
+</html>
